@@ -1,0 +1,129 @@
+#include <Arduino.h>
+#include <LiquidCrystal.h> 
+
+#define RS 23
+#define EN 22
+#define D7 5
+#define D6 18
+#define D5 19
+#define D4 21
+
+#define Pot1 33
+#define Pot2 32
+#define bot1 34
+#define bot2 35
+
+//************************ 
+//Create an LCD object.
+LiquidCrystal LCD(RS, EN, D4, D5, D6, D7); 
+uint8_t decenas, unidades, decimal, decenas1, unidades1, decimal1;
+unsigned int adcRaw; //Variable ADC que no usó
+float voltaje, voltaje2;
+//variables contador 
+unsigned long counter = 0;
+unsigned long lastButtonUpState = LOW;
+unsigned long lastButtonDownState = LOW;
+
+void setup ()
+{
+    pinMode(bot1, INPUT);
+    pinMode(bot2, INPUT);
+    Serial.begin(115200);
+    //Inicialización de LCD
+    LCD.begin(16,2);
+
+    LCD.clear();
+
+    //Print message to the LCD
+    LCD.print("hello world!");
+    
+    delay(3000);
+   LCD.clear();
+}
+
+void loop ()
+{
+    voltaje = analogReadMilliVolts(Pot1) / 10.0;
+    int temp = voltaje;
+    decenas = temp / 100.0;
+    temp = temp - decenas * 100.0;
+    unidades = temp / 10.0;
+    temp = temp -unidades*10.0;
+    decimal = temp; 
+
+    Serial.print (voltaje);
+    Serial.print ("\t");
+    Serial.print (decenas);
+    Serial.print ("\t");
+    Serial.print (unidades);
+    Serial.print ("\t");
+    Serial.print (decimal);
+
+
+    LCD.setCursor(0, 0);
+    LCD.print("Volt1");
+    LCD.setCursor(0, 1);
+    LCD.print (decenas);
+    LCD.print('.');
+    LCD.print (unidades);
+    LCD.print (decimal);
+
+    delay(250);
+
+
+    voltaje2 = analogReadMilliVolts(Pot2) / 10.0;
+    int temp2 = voltaje2;
+    decenas1 = temp2 / 100.0;
+    temp2 = temp2 - decenas1 * 100.0;
+    unidades1 = temp2 / 10.0;
+
+    temp2 = temp2 -unidades1*10.0;
+    decimal1 = temp2; 
+
+    Serial.print (voltaje2);
+    Serial.print ("\t");
+    Serial.print (decenas1);
+    Serial.print ("\t");
+    Serial.print (unidades1);
+    Serial.print ("\t");
+    Serial.print (decimal1);
+
+    LCD.setCursor(6, 0);
+    LCD.print("Volt2");
+    LCD.setCursor(6, 1);
+    LCD.print (decenas1);
+    LCD.print('.');
+    LCD.print (unidades1);
+    LCD.print (decimal1);
+
+    delay(250);
+
+
+  // Lectura del estado de los botones
+  int buttonUpState = digitalRead(bot1);
+  int buttonDownState = digitalRead(bot2);
+
+  //banner
+      LCD.setCursor(12, 0);
+      LCD.print("Cont");
+    // Incrementar el contador
+  if (buttonUpState == HIGH && lastButtonUpState == LOW) {
+    counter++;
+    LCD.setCursor(12, 1); // Segunda línea de la LCD
+    LCD.print(counter);
+  }
+
+  // Decrementar el contador
+  if (buttonDownState == HIGH && lastButtonDownState == LOW) {
+    counter--;
+    LCD.setCursor(12, 1); // Segunda línea de la LCD
+    LCD.print(counter);
+  }
+
+  // Actualizar el estado de los botones
+  lastButtonUpState = buttonUpState;
+  lastButtonDownState = buttonDownState;
+
+  delay(400);
+}
+
